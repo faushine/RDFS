@@ -13,7 +13,7 @@ def connect():
     # Connect to the database
     connection = pymysql.connect(host='mysql.cmigjolufvv5.us-west-2.rds.amazonaws.com',
                                  user='admin',
-                                 password='gotohell',
+                                 password='',
                                  db='rdfs',
                                  charset='utf8',
                                  cursorclass=pymysql.cursors.DictCursor)
