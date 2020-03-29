@@ -12,7 +12,7 @@ from line import Line
 def connect():
     # Connect to the database
     connection = pymysql.connect(host='mysql.cmigjolufvv5.us-west-2.rds.amazonaws.com',
-                                 user='admin',
+                                 user='',
                                  password='',
                                  db='rdfs',
                                  charset='utf8',
