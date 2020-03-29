@@ -6,6 +6,7 @@ import pymysql.cursors
 import warnings
 import hashlib
 import re
+from line import Line
 
 
 def connect():
@@ -114,6 +115,7 @@ def getFileInfo(path):
             results = cursor.fetchall()
             for r in results:
                 file = File('',r['fname'],r['permission'],r['fileOwner'],r['groupOwner'],r['fileType'],r['fileSize'],r['fileNode'],r['lastModified'])
+                file.content=r['content']
                 files.append(file)
     finally:
         connection.close()
@@ -231,6 +233,28 @@ def findByPattern(pattern,dirs,files):
             resFile.append(f)
     return (resDir,resFile)
 
+def findFilesByPattern(pattern,files):
+    resFile = []
+    for f in files:
+        if re.search(pattern, f.fname) is not None:
+            resFile.append(f)
+    return resFile
+
+def findContentByPattern(pattern,files):
+    result = {}
+    regex = re.compile(pattern)
+    for file in files:
+        res=[]
+        lines = str(file.content.decode(encoding='UTF-8')).splitlines()
+        for i in range(0,len(lines)):
+            if regex.search(lines[i]) is not None:
+                l = Line(i,lines[i])
+                res.append(l)
+        result[file.fname]=res
+    return result
+
+
+
 def printLsVerbose(dirs,files):
     for obj in dirs:
         print("{} {} {}  {}       {} {} {}".format(obj.permission, obj.dirNode, obj.dirOwner,
@@ -241,3 +265,15 @@ def printLsVerbose(dirs,files):
                                                    obj.groupOwner, obj.fileNode,
                                                    obj.lastModified, obj.fname))
 
+def printMathchFiles(lines):
+    for fname in lines:
+        print("Find matching file:",fname)
+        for l in lines[fname]:
+            print("{} {}".format(l.num,l.content))
+
+if __name__ == '__main__':
+    import re
+    r = 'Bat(wo)+man'
+    batRegex = re.compile(r)
+    mo1 = batRegex.search('The Adventures of Batwoman')
+    print(mo1.group())

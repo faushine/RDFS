@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from directory import Directory
 from utils import *
+from line import Line
 
 current_dir=''
 files=[]
@@ -70,9 +71,15 @@ def process_find(pattern):
     (dirs, files) = trackPath(current_dir)
     (dirs, files) = findByPattern(pattern,dirs,files)
     printLsVerbose(dirs,files)
+    return files
 
-def process_grep(pattern,path):
-    print(pattern)
+def process_grep(filePattern,contentPattern):
+    # grep pattern path
+    global current_dir
+    if len(current_dir) == 0: current_dir = root
+    files=findFilesByPattern(filePattern,getFileInfo(current_dir))
+    lines = findContentByPattern(contentPattern,files)
+    printMathchFiles(lines)
 
 def process_upload():
     path = Path(__file__).parent.absolute()
@@ -111,13 +118,10 @@ def main():
                     continue
                 process_find(paras[1])
             elif paras[0]=='grep':
-                if len(paras)<2:
+                if len(paras)<3:
                     print('pattern is required')
                     continue
-                if len(paras)<3:
-                    process_grep(paras[1],current_dir)
-                else:
-                    process_grep(paras[1],paras[2])
+                process_grep(paras[1],paras[2])
             elif paras[0]=='upload':
                 process_upload()
             elif paras[0]=='pwd':

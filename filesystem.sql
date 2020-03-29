@@ -4,8 +4,6 @@ DROP TABLE Directory;
 
 DROP TABLE File;
 
--- drwx------   4 faushine  staff       128 17 Mar 15:16 20811431_Zijian_Liu_Assignment3
-
 CREATE TABLE `Directory` (
   `dirId` varchar(50) NOT NULL,
   `dirPath` varchar(100) DEFAULT NULL,
@@ -34,12 +32,5 @@ CREATE TABLE `File` (
   PRIMARY KEY (`fId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-select * from Directory;
-
-select * from File;
-
-SELECT fname FROM File WHERE fId LIKE '58b8c709b11bd480dd364a68489cf40a%'
-
-SELECT min(dirPath) FROM Directory ORDER BY dirPath;
 
 
