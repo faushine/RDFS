@@ -35,12 +35,21 @@ $ cd test
 $ ls -l
 -rw-r--r-- 1 faushine  staff       1 Mar 28 23:29 .DS_Store
 -rw-r--r-- 1 faushine  staff       1 Mar 29 18:58 test.txt
-$ grep test ss
-Find matching file: test.txt
-0 sss
-1 Ssssssssssss
-$ find test
--rw-r--r-- 1 faushine  staff       1 Mar 29 18:58 test.txt
+$ grep "test" "ttt"
+Find matching file: /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/test.txt
+2 tttttttttt
+3 tttt
+$ find /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project "tes"
+drwxr-xr-x     3  faushine  staff       96  Mar 29 16:19  /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/.git/refs/remotes
+drwxr-xr-x     3  faushine  staff       96  Mar 29 16:19  /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/.git/logs/refs/remotes
+drwxr-xr-x     4  faushine  staff      128  Mar 29 18:58  /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/test
+-rw-r--r--     1  faushine  staff       50  Mar 29 18:59  /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/test.txt
+-rwxr-xr-x     1  faushine  staff    28536  Apr  2 17:56  /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/testt
+$ path -a
+test = /Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/testt
+$ path sss=/Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/testt
+store PATH success!
+
 ```
 #### upload
 
@@ -50,28 +59,34 @@ Traverse the directory tree and file content in current working directory. All o
 
 Change the current working directory.
 
+```bash
+cd [path]
+```
+
 #### ls
+
+List files and directories in the current working directory or the specific path.
+
 
 ```bash
 ls [-l] [path]
 ```
 
-List files and directories in the current working directory or the specific path.
-
 #### find
-
-```bash
-find [pattern]
-```
 
 Search in the current working directory, and accept the directory and (partial) name of the file being found; output the “ls -l” results
 for all matches.
 
-#### grep
-
 ```bash
-grep [filepattern] [contentpattern]
+find [path] [pattern]
 ```
+
+#### grep
 
 Search in the current working directory, and accept the (partial) name of the file and seek the relevant pattern in the matching file(s).
 Output the line number and line for the matching lines.
+
+
+```bash
+grep [fpattern] [cpattern]
+```

@@ -65,20 +65,24 @@ def process_ls(paras):
                 return
         printLsVerbose(dirs,files)
 
-def process_find(pattern):
+def process_find(path,pattern):
     global current_dir
     if len(current_dir)==0:current_dir=root
-    (dirs, files) = trackPath(current_dir)
+    if path=='./':path=current_dir
+    pattern=eval(pattern)
+    (dirs, files) = trackPath(path)
     (dirs, files) = findByPattern(pattern,dirs,files)
-    printLsVerbose(dirs,files)
+    printLsVerbosePath(dirs,files)
     return files
 
-def process_grep(filePattern,contentPattern):
+def process_grep(fPattern,cPattern):
     # grep pattern path
     global current_dir
     if len(current_dir) == 0: current_dir = root
-    files=findFilesByPattern(filePattern,getFileInfo(current_dir))
-    lines = findContentByPattern(contentPattern,files)
+    cPattern=eval(cPattern)
+    fPattern=eval(fPattern)
+    files=findFilesByPattern(fPattern,getFileInfo(current_dir))
+    lines = findContentByPattern(cPattern,files)
     printMathchFiles(lines)
 
 def process_upload():
@@ -101,6 +105,17 @@ def process_upload():
     uploadObjects(dirs,files)
     print('upload success!')
 
+def process_path(path):
+    p=path.split("=")
+    storePath(p[0],p[1])
+    print('store PATH success!')
+
+def pshow_path():
+    printShowPath()
+
+def process_exec(prog):
+    execProg(prog)
+
 def main():
     global current_dir
     try:
@@ -113,10 +128,10 @@ def main():
             elif paras[0]=='ls':
                 process_ls(paras)
             elif paras[0]=='find':
-                if len(paras)<2:
-                    print('pattern is required')
+                if len(paras)<3:
+                    print('pattern or path is required')
                     continue
-                process_find(paras[1])
+                process_find(paras[1],paras[2])
             elif paras[0]=='grep':
                 if len(paras)<3:
                     print('pattern is required')
@@ -127,6 +142,13 @@ def main():
             elif paras[0]=='pwd':
                 if len(current_dir)==0:current_dir=root
                 print(current_dir)
+            elif paras[0]=='path':
+                if paras[1].startswith('-'):pshow_path()
+                else:
+                    process_path(paras[1])
+            else:
+                process_exec(paras[0])
+
     except KeyboardInterrupt:
         pass
 

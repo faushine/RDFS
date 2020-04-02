@@ -12,8 +12,8 @@ from line import Line
 def connect():
     # Connect to the database
     connection = pymysql.connect(host='mysql.cmigjolufvv5.us-west-2.rds.amazonaws.com',
-                                 user='',
-                                 password='',
+                                 user='admin',
+                                 password='gotohell',
                                  db='rdfs',
                                  charset='utf8',
                                  cursorclass=pymysql.cursors.DictCursor)
@@ -33,6 +33,17 @@ def getRoot():
         connection.close()
     return root
 
+def storePath(key,value):
+    connection = connect()
+    try:
+        with connection.cursor() as cursor:
+            sql = 'INSERT INTO `Path` (pkey, pvalue) VALUES(%s, %s);'
+            cursor.execute(sql,(key,value))
+            connection.commit()
+    except:
+        print('error')
+    finally:
+        connection.close()
 
 def checkDirExists(dir, path):
     dirs = getSubDirInDirName(dir)
@@ -114,7 +125,7 @@ def getFileInfo(path):
             cursor.execute(sql, (dirHash + '%',))
             results = cursor.fetchall()
             for r in results:
-                file = File('',r['fname'],r['permission'],r['fileOwner'],r['groupOwner'],r['fileType'],r['fileSize'],r['fileNode'],r['lastModified'])
+                file = File('',r['fname'],r['permission'],r['fileOwner'],r['groupOwner'],r['fileType'],r['fileSize'],r['fileNode'],r['lastModified'],r['filePath'])
                 file.content=r['content']
                 files.append(file)
     finally:
@@ -141,12 +152,12 @@ def uploadObjects(dirs, files):
                     dir.dirSize, dir.lastModified))
             # upload files
             for file in files:
-                sql = "INSERT INTO File (fId, fname, content, permission, fileNode, fileOwner, groupOwner, fileSize, fileType,lastModified) " \
-                      "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                sql = "INSERT INTO File (fId, fname, content, permission, fileNode, fileOwner, groupOwner, fileSize, fileType,lastModified, filePath) " \
+                      "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 cursor.execute(sql,
                                (file.fId, file.fname, file.content, file.permission, file.fileNode, file.fileOwner,
                                 file.groupOwner,
-                                file.fileSize, file.type, file.lastModified))
+                                file.fileSize, file.type, file.lastModified,file.filePath))
         # connection is not autocommit by default. So you must commit to save
         # your changes.
         connection.commit()
@@ -172,7 +183,7 @@ def getInfoFile(parent, fname):
     if len(t) > 1 and len(t[0]) > 0:
         type = t[-1]
     date = formatDate(res)
-    file = File(parent.dirId, fname, permission, fileOwner, groupOwner, type, fileSize, fileNode, date)
+    file = File(parent.dirId, fname, permission, fileOwner, groupOwner, type, fileSize, fileNode, date, fullPath)
     try:
         f = open(fullPath, "rb")
         content = f.read()
@@ -245,31 +256,83 @@ def findContentByPattern(pattern,files):
     regex = re.compile(pattern)
     for file in files:
         res=[]
-        lines = str(file.content.decode(encoding='UTF-8')).splitlines()
+        lines=[]
+        try:
+            lines = str(file.content.decode(encoding='UTF-8')).splitlines()
+        except:
+            continue
         for i in range(0,len(lines)):
             if regex.search(lines[i]) is not None:
                 l = Line(i,lines[i])
                 res.append(l)
-        result[file.fname]=res
+        if len(res)>0: result[file.filePath]=res
     return result
 
-
+def execProg(prog):
+    connection = connect()
+    path=''
+    try:
+        with connection.cursor() as cursor:
+            sql = 'SELECT pvalue FROM Path WHERE pkey=%s'
+            cursor.execute(sql, (prog,))
+            result = cursor.fetchone()
+            path = result['pvalue']
+    finally:
+        connection.close()
+    if len(path)==0:
+        print('No such executable file!')
+        return
+    # subprocess.run(['/bin/sh','/Users/faushine/Documents/CourseWork/2020Winter/ECE656/project/.testt'])
+    pathA=path.split('/')
+    dir=''
+    for i in range(1,len(pathA)-1):
+        dir=dir+'/'+pathA[i]
+    fname = pathA[-1]
+    cmd1 = 'cd '+dir
+    cmd2 = './'+fname
+    final = subprocess.Popen("{}; {}".format(cmd1, cmd2), shell=True, stdin=subprocess.PIPE,
+                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+    stdout, nothing = final.communicate()
+    print(stdout.decode(encoding='UTF-8'))
 
 def printLsVerbose(dirs,files):
     for obj in dirs:
-        print("{} {} {}  {}       {} {} {}".format(obj.permission, obj.dirNode, obj.dirOwner,
-                                                   obj.groupOwner, obj.dirNode,
+        print("{} {:>5}  {}  {} {:>8}  {:>3}  {}".format(obj.permission, obj.dirNode, obj.dirOwner,
+                                                   obj.groupOwner, obj.dirSize,
                                                    obj.lastModified, obj.dirName))
     for obj in files:
-        print("{} {} {}  {}       {} {} {}".format(obj.permission, obj.fileNode, obj.fileOwner,
-                                                   obj.groupOwner, obj.fileNode,
+        print("{} {:>5}  {}  {} {:>8}  {:>3}  {}".format(obj.permission, obj.fileNode, obj.fileOwner,
+                                                   obj.groupOwner, obj.fileSize,
                                                    obj.lastModified, obj.fname))
+
+def printLsVerbosePath(dirs,files):
+    for obj in dirs:
+        print("{} {:>5}  {}  {} {:>8}  {:>3}  {}".format(obj.permission, obj.dirNode, obj.dirOwner,
+                                                   obj.groupOwner, obj.dirSize,
+                                                   obj.lastModified, obj.dirPath))
+    for obj in files:
+        print("{} {:>5}  {}  {} {:>8}  {:>3}  {}".format(obj.permission, obj.fileNode, obj.fileOwner,
+                                                   obj.groupOwner, obj.fileSize,
+                                                   obj.lastModified, obj.filePath))
+
 
 def printMathchFiles(lines):
     for fname in lines:
         print("Find matching file:",fname)
         for l in lines[fname]:
             print("{} {}".format(l.num,l.content))
+
+def printShowPath():
+    connection = connect()
+    try:
+        with connection.cursor() as cursor:
+            sql = 'SELECT * FROM Path'
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            for r in result:
+                print('{} = {}'.format(r['pkey'],r['pvalue']))
+    finally:
+        connection.close()
 
 if __name__ == '__main__':
     import re

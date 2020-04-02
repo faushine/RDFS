@@ -4,10 +4,12 @@ DROP TABLE Directory;
 
 DROP TABLE File;
 
+DROP TABLE `Path`;
+
 CREATE TABLE `Directory` (
   `dirId` varchar(50) NOT NULL,
   `dirPath` varchar(100) DEFAULT NULL,
-  `dirName` VARCHAR(20),
+  `dirName` varchar(20),
   `dirSub` text,
   `permission` varchar(15) DEFAULT NULL,
   `dirNode` INT,
@@ -29,8 +31,19 @@ CREATE TABLE `File` (
   `fileSize` INT,
   `fileType` varchar(10) DEFAULT NULL,
    `lastModified` VARCHAR(20),
+   `filePath` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`fId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `Path` (
+  `pkey` varchar(20) NOT NULL,
+  `pvalue` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`pkey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+select * from `Path`;
+
+select * from `Directory`;
+
+select * from `File`;
 
